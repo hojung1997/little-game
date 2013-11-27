@@ -1,0 +1,192 @@
+
+
+<html>
+
+
+<head>
+
+  <meta charset = 'utf-8' />
+
+  <title> ex1 </title>
+
+  <style type="text/css">
+
+  #lock {
+  }
+
+  #swipe {
+  }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<div id = 'lock'>
+
+</div>
+
+<div id = 'main'>
+
+  <div id = "time">
+  </div>
+
+  <br/>
+  <br/>
+
+  <div id = "swipe">
+  </div>
+ 
+  <br/> 
+  <br/> 
+
+
+<!--  <div id = "box"> </div>  -->
+
+</div>
+
+
+
+<script type="text/javascript">
+
+window.addEventListener('load', function(){ // on page load
+
+  var startCord = {x: 0, y: 0};  
+  var deltaCord = {x: 0, y: 0, dx:0, dy:0, t:0};
+
+  var maxminCord = {x : {max:0 , min:0, maxer:0, miner: 0}, 
+                    y : {max:0, min:0 ,maxer:0, miner: 0} };
+
+  var counter, zap, startTime;
+
+   
+  document.body.addEventListener('touchstart', function(e){
+
+    counter = 0; zap = 0; startTime = new Date().getTime();
+
+    startCord.x = e.changedTouches[0].pageX;
+    startCord.y = e.changedTouches[0].pageY;
+
+    maxminCord.x.max = startCord.x;    maxminCord.x.min = startCord.x;
+    maxminCord.y.max = startCord.y;    maxminCord.y.min = startCord.y;
+
+    console.log("X:" + e.changedTouches[0].pageX +", Y:" + e.changedTouches[0].pageY);
+
+    document.getElementById('swipe').innerHTML = '';
+
+  }, false);
+
+
+  document.body.addEventListener('touchmove', function(e){
+
+    counter++;
+
+    var dx = (e.changedTouches[0].pageX - startCord.x) - deltaCord.x;
+    var dy = (e.changedTouches[0].pageY - startCord.y) - deltaCord.y;
+
+    function norm (x1,x2) {
+        return Math.sqrt(x1 * x1 + x2 * x2);
+    }
+
+    if ((dx * deltaCord.dx + dy * deltaCord.dy) / (norm(dx, dy) * norm(deltaCord.dx, deltaCord.dy)) < 0 ) zap++;
+
+    deltaCord.dx = dx;
+    deltaCord.dy = dy;
+
+    deltaCord.x = e.changedTouches[0].pageX - startCord.x;
+    deltaCord.y = e.changedTouches[0].pageY - startCord.y;
+
+    if (e.changedTouches[0].pageX > maxminCord.x.max) {
+        maxminCord.x.max = e.changedTouches[0].pageX;
+        maxminCord.x.maxer = counter;
+    }
+    else if (e.changedTouches[0].pageX < maxminCord.x.min) {
+        maxminCord.x.min = e.changedTouches[0].pageX;
+        maxminCord.x.miner = counter;
+    }
+
+    if (e.changedTouches[0].pageY > maxminCord.y.max) {
+        maxminCord.y.max = e.changedTouches[0].pageY;
+        maxminCord.y.maxer = counter;
+    }
+    else if (e.changedTouches[0].pageY < maxminCord.y.min) {
+        maxminCord.y.min = e.changedTouches[0].pageY;
+        maxminCord.y.miner = counter;
+    }
+
+    //time 
+
+    deltaCord.t = new Date().getTime() - startTime;
+
+    document.getElementById('time').innerHTML = 'Startime: ' + startTime + '<br/>'
+                                                +'Druination: ' + deltaCord.t;
+
+    console.log("X:" + e.changedTouches[0].pageX +", Y:" + e.changedTouches[0].pageY
+             + ", deltaX:" + deltaCord.x +", deltaY:" + deltaCord.y
+             + ", maxer of X:" + maxminCord.x.maxer + ", maxer of Y:" + maxminCord.y.maxer + ", counter now:" + counter
+             + ", zaps: " + zap); 
+
+
+    if ( (Math.abs(deltaCord.x) > 200) && (Math.abs(maxminCord.y.max - maxminCord.y.min) < 50) && (deltaCord.t < 200) ) {
+        (deltaCord.x > 0 ) ? document.getElementById('swipe').innerHTML = "right swipe!" : document.getElementById('swipe').innerHTML = "left swipe!";
+    }
+
+    if ( (Math.abs(deltaCord.y) > 200) && (Math.abs(maxminCord.x.max - maxminCord.x.min) < 50) && (deltaCord.t < 200) ) {
+        (deltaCord.y > 0 ) ? document.getElementById('swipe').innerHTML = "down swipe!" : document.getElementById('swipe').innerHTML = "up swipe!";
+    }
+
+
+  }, false);
+
+  
+  document.body.addEventListener('touchend', function(e){
+
+    var total = counter;
+
+/*
+    if ( (Math.abs(deltaCord.x) > 200) && (Math.abs(maxminCord.y.max - maxminCord.y.min) < 50) ) {
+        (deltaCord.x > 0 ) ? alert("right swipe!") : alert("left swipe!");
+    }
+
+    if ( (Math.abs(deltaCord.y) > 200) && (Math.abs(maxminCord.x.max - maxminCord.x.min) < 50) ) {
+        (deltaCord.y > 0 ) ? alert("down swipe!") : alert("up swipe!");
+    }
+
+*/
+
+    if (( Math.abs(deltaCord.y) + Math.abs(deltaCord.x) < 50 ) && (Math.abs(maxminCord.y.max - maxminCord.y.min) > 50) && (Math.abs(maxminCord.x.max - maxminCord.x.min) > 50)) {
+        function ord (a, b, m) {
+          var a_b = a-b; if (a_b < 0) a_b += m;
+          var b_a = b-a; if (b_a < 0) b_a += m;
+
+          if (a_b < b_a) return a_b;
+          if (b_a < a_b) return -b_a;
+          if (b_a == a_b) return 0;
+
+        }
+
+        if (ord(maxminCord.x.maxer, maxminCord.y.maxer, total) > total / 10) alert("counter-clockwise cirle!");
+        if (ord(maxminCord.x.maxer, maxminCord.y.maxer, total) < -total / 10) alert("clockwise cirle!");
+    }
+
+
+    // todo: 八個方向的判swipe
+    // todo: 加入時間因素
+    // todo: 多重circle的判別
+    // todo: 算叉叉的個數
+
+
+  }, false);
+   
+}, false);
+
+
+</script>
+
+</body>
+
+
+</html>
